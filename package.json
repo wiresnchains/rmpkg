@@ -19,7 +19,7 @@
   "license": "ISC",
   "author": "wiresnchains",
   "bin": {
-    "rmpkg": "./bin/rrmpkg.js"
+    "rmpkg": "./bin/rmpkg.js"
   },
   "scripts": {
     "dev": "node ./bin/rmpkg.js"
