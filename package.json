@@ -1,0 +1,31 @@
+{
+  "name": "rmpkg",
+  "version": "0.1.0",
+  "description": "A tool to download RAGE:MP server files using a simple console command",
+  "type": "commonjs",
+  "keywords": [
+    "cli",
+    "ragemp",
+    "rage:mp"
+  ],
+  "homepage": "https://github.com/wiresnchains/rmpkg#readme",
+  "bugs": {
+    "url": "https://github.com/wiresnchains/rmpkg/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wiresnchains/rmpkg.git"
+  },
+  "license": "ISC",
+  "author": "wiresnchains",
+  "bin": {
+    "rmpkg": "./bin/rrmpkg.js"
+  },
+  "scripts": {
+    "dev": "node ./bin/rmpkg.js"
+  },
+  "dependencies": {
+    "picocolors": "^1.1.1",
+    "tar": "^7.4.3"
+  }
+}
