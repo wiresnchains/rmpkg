@@ -73,7 +73,7 @@ async function win32Download(ignoredFiles) {
  * @param {Array<string>} ignoredFiles Files that won't be downloaded
  */
 async function linuxDownload(ignoredFiles) {
-    await downloadFiles(FILES_LINUX, ignoredFiles);
+    await downloadFiles(FILES_LINUX, []);
 
     console.log(`${picocolors.greenBright("===== Unpacking ======")}`);
 
@@ -83,15 +83,34 @@ async function linuxDownload(ignoredFiles) {
         });
 
         const folderPath = `./${UNPACK_FOLDER_LINUX}`;
-        const files = fs.readdirSync(folderPath);
+        const files = getAllFiles(folderPath);
 
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
-            console.log(file);
 
             const srcPath = path.join(folderPath, file);
             const targetPath = path.join("./", file);
-            fs.renameSync(srcPath, targetPath);
+
+            let ignore = false;
+
+            for (let j = 0; j < files.length; j++) {
+                const ignoredFileName = ignoredFiles[j];
+
+                if (file.endsWith(ignoredFileName)) {
+                    ignore = true;
+                    break;
+                }
+            }
+
+            if (ignore) {
+                console.log(`${file} ${picocolors.red("[IGNORED]")}`);
+                continue;
+            }
+            else {
+                console.log(file);
+            }
+            
+            fs.cpSync(srcPath, targetPath, { recursive: true, force: true });
         }
 
         fs.rmSync(`./${UNPACK_FOLDER_LINUX}`, { recursive: true, force: true });
@@ -100,6 +119,29 @@ async function linuxDownload(ignoredFiles) {
     catch (err) {
         console.error(`${picocolors.redBright("Failed to unpack:")} ${picocolors.reset(FILES_LINUX[0])}`);
     }
+}
+
+function getAllFiles(dirPath) {
+    const result = [];
+
+    function walk(currentPath) {
+        const entries = fs.readdirSync(currentPath);
+
+        for (const entry of entries) {
+            const fullPath = path.join(currentPath, entry);
+            const stat = fs.statSync(fullPath);
+
+            if (stat.isDirectory()) {
+                walk(fullPath);
+            } else {
+                result.push(path.relative(dirPath, fullPath));
+            }
+        }
+    }
+
+    walk(dirPath);
+
+    return result;
 }
 
 /**
