@@ -28,12 +28,29 @@ async function main() {
 
     console.log(`${picocolors.greenBright("===== Download ======")}`);
 
+    const ignoredFiles = [];
+
+    for (let i = 0; i < process.argv.length; i++) {
+        const arg = process.argv[i];
+
+        if (arg == "--ignore") {
+            const value = process.argv[i + 1];
+
+            if (!value) {
+                console.error(`${picocolors.red("Failed to parse ignored file (undefined)")}`);
+                return;
+            }
+
+            ignoredFiles.push(value);
+        }
+    }
+
     switch (process.platform) {
         case "win32":
-            await win32Download();
+            await win32Download(ignoredFiles);
             break;
         case "linux":
-            await linuxDownload();
+            await linuxDownload(ignoredFiles);
             break;
         default:
             console.error(`${picocolors.red("RAGE:MP server is not supported on your system")}`);
@@ -45,16 +62,18 @@ async function main() {
 
 /**
  * Downloads windows server files
+ * @param {Array<string>} ignoredFiles Files that won't be downloaded
  */
-async function win32Download() {
-    await downloadFiles(FILES_WIN32);
+async function win32Download(ignoredFiles) {
+    await downloadFiles(FILES_WIN32, ignoredFiles);
 }
 
 /**
  * Downloads and unpacks linux server files
+ * @param {Array<string>} ignoredFiles Files that won't be downloaded
  */
-async function linuxDownload() {
-    await downloadFiles(FILES_LINUX);
+async function linuxDownload(ignoredFiles) {
+    await downloadFiles(FILES_LINUX, ignoredFiles);
 
     console.log(`${picocolors.greenBright("===== Unpacking ======")}`);
 
@@ -85,14 +104,32 @@ async function linuxDownload() {
 
 /**
  * Downloads all files from the given array from the HTTPS server specified in the BASE_URL constant
- * @param {Array<string>} files 
+ * @param {Array<string>} files
+ * @param {Array<string>} ignoredFiles Files that won't be downloaded
  */
-async function downloadFiles(files) {
+async function downloadFiles(files, ignoredFiles) {
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
 
-        console.log(file);
-        
+        let ignore = false;
+
+        for (let j = 0; j < files.length; j++) {
+            const ignoredFileName = ignoredFiles[j];
+
+            if (file.endsWith(ignoredFileName)) {
+                ignore = true;
+                break;
+            }
+        }
+
+        if (ignore) {
+            console.log(`${file} ${picocolors.red("[IGNORED]")}`);
+            continue;
+        }
+        else {
+            console.log(file);
+        }
+
         try {
             await downloadFile(`${BASE_URL}/${file}`, `./${file}`);
         }
